@@ -1,0 +1,8 @@
+*.py[co]
+.vscode
+.DS_Store
+build/**
+*.so
+*.o
+*.g.gch
+
