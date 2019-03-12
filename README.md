@@ -7,6 +7,7 @@ More than Make.
 
 Craft is a build monitor on top of Make, a build utility.
 
+This is based on [make-formatter.py](https://github.com/Leedehai/make-output-prettify), also authored by me.<br>
 With minimal changes of code, it can be applied to other build systems, like Google's [Ninja](https://ninja-build.org), as well. 
 
 ### 1. Use case
@@ -21,7 +22,9 @@ Moreover, in some cases developers may be interested in the exact commands that 
 This is where Craft comes in.
 
 ### 2. Prerequisites
+- macOS or Linux (sorry, no Windows).
 - GNU Make, 3.81 or higher.
+- C compiler supporting C11.
 - Python 2.7, or Python 3.5 or higher.
 
 ### 3. Limitations
@@ -31,7 +34,9 @@ This project is taken from a larger C/C++ project of mine, and I don't intend to
 Craft has a simple architecture. It is basically a client-server pattern, but the communication between clients and the server is monodirectional. In light of this, Craft has three components:
 - manager: the top-level API, which invokes `make` for you,
 - observer: the program (client) that runs commands and capture commands' output,
-- recorder: the program (server) that logs reports sent by clients.
+- recorder: the program (server) that logs reports sent by observers.
+
+Because each (interested) command in Makefile will be invoked by the observer, it is crucial that the observer adds a minimum runtime overhead. Therefore, the observer is written in C, and should be compiled before invoking Craft. If the manager finds the observer is not compiled, it will automatically compile it before launching the first observer.
 
 ### 5. How to use
 1. Add `$(OBSERVER)` to the compiler name in the Makefile. In other words, instead of having

@@ -2,18 +2,9 @@
 # Copyright: see README and LICENSE under the project root directory.
 # Author: Haihong Li
 #
-# File: make-formatter.py
+# File: craft.py
 # ---------------------------
-# Make formatter engine: prettify the output of some make commands (less verbose) in
-# real time. It works with multithreaded 'make' as well.
-# Call:  make-formatter.py         # replacing 'make'
-#        make-formatter.py -- -j8  # replacing 'make -j8'
-# List and count targets to-be-built:
-#        make-formatter.py -- --dry-run | grep " => "
-#        make-formatter.py -- --dry-run | grep --count " => "
-
-# switch: if False, all output lines are passed through as is.
-enable = True # normally you should not touch this
+# Top-level manager.
 
 import sys, signal
 import subprocess
@@ -167,8 +158,8 @@ Generate processed line, and whether it should be printed
 @return tuple (str, bool, str)
 """
 def process(line):
-    if not enable:
-        return (line, True, ACT_PASSTHROUGH)
+    # uncomment the line below to pass through all lines
+    # return (line, True, ACT_PASSTHROUGH)
     handler = get_processing_handler(line)
     return handler(line) # return (str: processed line, bool: should print, str: action)
 
