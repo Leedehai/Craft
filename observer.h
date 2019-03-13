@@ -4,15 +4,15 @@
  * 
  * file: observer.h
  * ---------------------------
- * Observer. It executes a command in Makefile, and captures the command's
- * stdout and stderr output.
+ * Observer. It executes a command from stdin, and captures the command's
+ * stdout and stderr output, and send data to recorder.
  * NOTE it heavily relies on POSIX libraries.
  */
 
 #ifndef OBSERVER_H_
 #define OBSERVER_H_
 
-/* to work with GCC, these macros are necessary (one is sufficient, but I defined
+/* to work with GCC, these macros should be defined (one is sufficient, but I defined
  * both just in case); Clang doesn't need them */
 #define _GNU_SOURCE
 #define _POSIX_C_SOURCE 19940123L

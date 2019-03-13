@@ -4,8 +4,8 @@
  * 
  * file: observer.c
  * ---------------------------
- * Observer. It executes a command in Makefile, and captures the command's
- * stdout and stderr output.
+ * Observer. It executes a command from stdin, and captures the command's
+ * stdout and stderr output, and send data to recorder.
  * NOTE it heavily relies on POSIX libraries.
  */
 

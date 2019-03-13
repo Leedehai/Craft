@@ -17,7 +17,7 @@ Often times, a project has a (or more) complicated Makefile. Lots of information
 - redirect the output to `/dev/null`
 - add `@` in front of a command in Makefile as to silence it.
 
-But both completely silenced the output, leaving developer no knowledge of what command is being executed. To sum up, the pain point is that the developers want to know which command is being executed by Make at any given moment, but they do not want Make to echo the exact commands. In a word, they want a **succinct** real-time printout.
+But both completely silence the output, leaving the developer no knowledge of what command is being executed. To sum up, the pain point is that developers want to know which command is being executed by Make at any given moment, but they do not want Make to echo the exact commands. In a word, they want a **succinct** real-time printout.
 
 Moreover, in some cases developers may be interested in the exact commands that were executed, mainly in order to debug the project. Therefore, they want a **logging** feature as well.
 
