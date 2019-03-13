@@ -8,14 +8,49 @@
  */
 
 #include "observer.h"
+#include <netdb.h>      /* for gethostbyname */
+#include <sys/socket.h> /* for socket, connect, etc. */
+#include <arpa/inet.h>  /* for htonl, htons, sockaddr_in, etc. */
 
-/* utilities */
+int createClientSocket(const char *host, unsigned short port) {
+  struct hostent *he = gethostbyname(host);
+  if (he == NULL) {
+      fprintf(stderr, "[Error] observer: hostent structure is NULL\n");
+      return kClientSocketError;
+  }
+
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0) {
+      fprintf(stderr, "[Error] observer: error when creating client socket\n");
+      return kClientSocketError;
+  }
+  
+  struct sockaddr_in serverAddress;
+  memset(&serverAddress, 0, sizeof(serverAddress));
+  serverAddress.sin_family = AF_INET;
+  serverAddress.sin_port = htons(port);
+  serverAddress.sin_addr.s_addr = 
+    ((struct in_addr *)he->h_addr_list[0])->s_addr;
+  
+  if (connect(sock, (struct sockaddr *) &serverAddress, 
+	      sizeof(serverAddress)) != 0) {
+    fprintf(stderr, "[Error] observer: error when connecting\n");
+    close(sock);
+    return kClientSocketError;
+  }
+  
+  return sock;
+}
+
+void closeClientSocket(int sock) {
+    close(sock);
+}
 
 int callocOutputs(outputs_t *outputs) {
     outputs->stdoutStr = (char *)calloc(kMaxRead, sizeof(char));
     outputs->stderrStr = (char *)calloc(kMaxRead, sizeof(char));
     if (!outputs->stdoutStr || !outputs->stderrStr) {
-        fprintf(stderr, "[Error] error in calloc()\n");
+        fprintf(stderr, "[Error] observer: error in calloc()\n");
         return 1;
     }
     return 0;
@@ -29,6 +64,10 @@ void freeOutputs(outputs_t *outputs) {
 void recordTime(time_report_t *times, int which) {
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &(times->proc[which]));
     clock_gettime(CLOCK_REALTIME, &(times->real[which]));
+}
+
+double ntimeToSec(ntime_t *t) {
+    return t->tv_sec + t->tv_nsec / 1e9;
 }
 
 static void subtractTime(ntime_t * const t1, ntime_t * const t2, ntime_t *dt) {

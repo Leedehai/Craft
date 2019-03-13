@@ -6,6 +6,7 @@
  * ---------------------------
  * Observer. It executes a command in Makefile, and captures the command's
  * stdout and stderr output.
+ * NOTE it heavily relies on POSIX libraries.
  */
 
 #ifndef OBSERVER_H_
@@ -16,11 +17,15 @@
 #define _GNU_SOURCE
 #define _POSIX_C_SOURCE 19940123L
 
+#include <memory.h>
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+
+static const int kClientSocketError = -1;
+static const int kDefaultBacklog = 32;
 
 /* C disallows variable-sized array from initialization, hence I have
  * to define kMaxRead as a macro instead of a 'static const int' */
@@ -48,12 +53,21 @@ typedef struct {
 } time_report_t;
 enum { kStart = 0, kFinish = 1, kElapsed = 2 };
 
-void captureOutputs(outputs_t *, int stdoutRead, int stderrRead);
-void forwardOutputs(outputs_t *, time_report_t *);
+/* stdout, stderr, times, command, exit code */
+static const size_t kPacketMaxLen = 4096 * 2 + 256 + 1024 + 8 + 100;
 
+int report(subprocess_t *, time_report_t *, char *cmd[], int exitCode);
+void captureOutputs(outputs_t *, int stdoutRead, int stderrRead);
+size_t serializeData(char *data, outputs_t *, time_report_t *, char *cmd[], int exitCode);
+void sendData(char *data, size_t len);
+void writeString(int fd, const char *str, size_t len);
+
+int createClientSocket(const char *host, unsigned short port);
+void closeClientSocket(int sock);
 int callocOutputs(outputs_t *);
 void freeOutputs(outputs_t *);
 void recordTime(time_report_t *times, int which);
+double ntimeToSec(ntime_t *t);
 void calcElapsed(time_report_t *times);
 const char *getSignalName(int sig);
 void printSignal(FILE *f, int sig);

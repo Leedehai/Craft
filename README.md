@@ -1,3 +1,5 @@
+Work in progress: observer and recorder are runnable
+
 # Craft
 
 More than Make.
