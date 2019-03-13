@@ -15,7 +15,7 @@
 int createClientSocket(const char *host, unsigned short port) {
   struct hostent *he = gethostbyname(host);
   if (he == NULL) {
-      fprintf(stderr, "[Error] observer: hostent structure is NULL\n");
+      fprintf(stderr, "[Error] observer: host not resolved: %s\n", host);
       return kClientSocketError;
   }
 
@@ -34,7 +34,7 @@ int createClientSocket(const char *host, unsigned short port) {
   
   if (connect(sock, (struct sockaddr *) &serverAddress, 
 	      sizeof(serverAddress)) != 0) {
-    fprintf(stderr, "[Error] observer: error when connecting\n");
+    fprintf(stderr, "[Error] observer: unable to connect %s:%d\n", host, port);
     close(sock);
     return kClientSocketError;
   }

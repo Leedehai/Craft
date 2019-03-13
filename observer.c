@@ -97,68 +97,6 @@ void captureOutputs(outputs_t *outputs, int stdoutRead, int stderrRead) {
     return;
 }
 
-static void printString(char *dest, const char *src, size_t count, size_t *pos) {
-    memcpy(dest + *pos, src, count);
-    *pos += count;
-}
-
-static void printDouble(char *dest, const char *fmt, double value, size_t *pos) {
-    int count = sprintf(dest + *pos, fmt, value);
-    *pos += count;
-}
-
-/* Like Protobuf, albeit very simple and rudimentary */
-size_t serializeData(char *data,
-                     outputs_t *const outputs,
-                     time_report_t *const times,
-                     char *cmd[],
-                     int exitCode) {
-    static const char *kExitCodeHeader    = "[[exit]]";
-    static const int   kExitCodeHeaderLen = 8; /* not counting '\0' */
-    static const char *kCommandHeader    = "[[cmd]]";
-    static const int   kCommandHeaderLen = 7; /* not counting '\0' */
-    static const char *kStdoutHeader    = "[[out]]";
-    static const int   kStdoutHeaderLen = 7; /* not counting '\0' */
-    static const char *kStderrHeader    = "[[err]]";
-    static const int   kStderrHeaderLen = 7; /* not counting '\0' */
-    static const char *kTimesHeader    = "[[time]]";
-    static const int   kTimesHeaderLen = 8; /* not counting '\0' */
-    
-    size_t pos = 0;
-
-    printString(data, kExitCodeHeader, kExitCodeHeaderLen, &pos);
-    printString(data, exitCode ? "1" : "0", 1, &pos);
-
-    printString(data, kCommandHeader, kCommandHeaderLen, &pos);
-    char **part = cmd;
-    while (*part) {
-        printString(data, *part, strlen(*part), &pos);
-        printString(data, " ", 1, &pos);
-        ++part;
-    }
-
-    printString(data, kStdoutHeader, kStdoutHeaderLen, &pos);
-    printString(data, outputs->stdoutStr, outputs->stdoutSize, &pos);
-
-    printString(data, kStderrHeader, kStderrHeaderLen, &pos);
-    printString(data, outputs->stderrStr, outputs->stderrSize, &pos);
-
-    printString(data, kTimesHeader, kTimesHeaderLen, &pos);
-    printDouble(data, "%f", ntimeToSec(&(times->proc[kStart])), &pos);
-    printString(data, ",", 1, &pos);
-    printDouble(data, "%f", ntimeToSec(&(times->proc[kFinish])), &pos);
-    printString(data, ",", 1, &pos);
-    printDouble(data, "%f", ntimeToSec(&(times->proc[kElapsed])), &pos);
-    printString(data, ";", 1, &pos);
-    printDouble(data, "%f", ntimeToSec(&(times->real[kStart])), &pos);
-    printString(data, ",", 1, &pos);
-    printDouble(data, "%f", ntimeToSec(&(times->real[kFinish])), &pos);
-    printString(data, ",", 1, &pos);
-    printDouble(data, "%f", ntimeToSec(&(times->real[kElapsed])), &pos);
-
-    return pos;
-}
-
 void sendData(char *data, size_t len) {
     int clientSocket = createClientSocket(kRecorderHost, kRecorderPort);
     if (clientSocket == kClientSocketError) {

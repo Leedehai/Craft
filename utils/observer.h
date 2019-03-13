@@ -58,9 +58,10 @@ static const size_t kPacketMaxLen = 4096 * 2 + 256 + 1024 + 8 + 100;
 
 int report(subprocess_t *, time_report_t *, char *cmd[], int exitCode);
 void captureOutputs(outputs_t *, int stdoutRead, int stderrRead);
-size_t serializeData(char *data, outputs_t *, time_report_t *, char *cmd[], int exitCode);
 void sendData(char *data, size_t len);
 void writeString(int fd, const char *str, size_t len);
+
+size_t serializeData(char *data, outputs_t *, time_report_t *, char *cmd[], int exitCode);
 
 int createClientSocket(const char *host, unsigned short port);
 void closeClientSocket(int sock);
