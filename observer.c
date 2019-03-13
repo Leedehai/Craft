@@ -8,6 +8,12 @@
  * stdout and stderr output.
  */
 
+/* to work with GCC, these macros are necessary (one is sufficient, but I defined
+ * both just in case); Clang doesn't need them */
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 19940123L
+
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,8 +23,7 @@
  * to define kMaxRead as a macro instead of a 'static const int' */
 #define kMaxRead 4096
 
-static const int kRead = 0;
-static const int kWrite = 1;
+enum { kRead = 0, kWrite = 1 };
 
 typedef struct {
     int pid;        /* the subprocess's pid */
@@ -33,7 +38,20 @@ typedef struct {
     ssize_t stderrSize;
 } outputs_t;
 
+typedef struct timespec ntime_t;
+typedef struct {
+    ntime_t proc[3];
+    ntime_t real[3];
+} time_report_t;
+enum { kStart = 0, kFinish = 1, kElapsed = 2 };
+
 void captureOutputs(outputs_t *, int stdoutRead, int stderrRead);
+void forwardOutputs(outputs_t *, time_report_t *);
+
+int callocOutputs(outputs_t *);
+void freeOutputs(outputs_t *);
+void recordTime(time_report_t *times, int which);
+void calcElapsed(time_report_t *times);
 const char *getSignalName(int sig);
 void printSignal(FILE *f, int sig);
 
@@ -44,7 +62,10 @@ int runCommand(char *cmd[]) {
     if (pipe(stdoutPipe) || pipe(stderrPipe)) {
         fprintf(stderr, "[Error] pipe()\n");
     }
-    /* fork */
+    
+    time_report_t times;
+    recordTime(&times, kStart);
+
 	subprocess_t sp = { fork(), stdoutPipe[kRead], stderrPipe[kRead] }; 
 	
     if (sp.pid == 0) { /* child process */
@@ -66,21 +87,29 @@ int runCommand(char *cmd[]) {
 	}
 	
     /* parent process */
+    
     /* prevent parent from writing to pipe */
     close(stdoutPipe[kWrite]);
     close(stderrPipe[kWrite]);
+    
     int status;
     waitpid(sp.pid, &status, 0);
+
+    recordTime(&times, kFinish);
+
     if (WIFEXITED(status)) {
         outputs_t outputs;
+        if (callocOutputs(&outputs)) {
+            freeOutputs(&outputs);
+            return 1;
+        }
 
         /* capture output and handle it */
         captureOutputs(&outputs, sp.stdoutRead, sp.stderrRead);
-        fprintf(stdout, "(stdout) %s\n", outputs.stdoutSize ? outputs.stdoutStr : "(empty)");
-        fprintf(stderr, "(stderr) %s\n", outputs.stderrSize ? outputs.stderrStr : "(empty)");
+        calcElapsed(&times);
+        forwardOutputs(&outputs, &times);
 
-        if (outputs.stdoutStr) { free(outputs.stdoutStr); }
-        if (outputs.stderrStr) { free(outputs.stderrStr); }
+        freeOutputs(&outputs);
 
         /* use the child's exit status: WIFEXITED() returns true if program
          * exits without being interrupted by signal */
@@ -93,18 +122,57 @@ int runCommand(char *cmd[]) {
 }
 
 void captureOutputs(outputs_t *outputs, int stdoutRead, int stderrRead) {
+    outputs->stdoutSize = read(stdoutRead, outputs->stdoutStr, kMaxRead);
+    outputs->stderrSize = read(stderrRead, outputs->stderrStr, kMaxRead);
+    return;
+}
+
+void forwardOutputs(outputs_t *const outputs, time_report_t *const times) {
+    fprintf(stdout, "(stdout) %s\n", outputs->stdoutSize ? outputs->stdoutStr : "(empty)");
+    fprintf(stderr, "(stderr) %s\n", outputs->stderrSize ? outputs->stderrStr : "(empty)");
+    fprintf(stdout, "time %f %f\n",
+            (times->proc[kElapsed].tv_sec + times->proc[kElapsed].tv_nsec / 1e9),
+            (times->real[kElapsed].tv_sec + times->real[kElapsed].tv_nsec / 1e9));
+}
+
+/* utilities */
+
+int callocOutputs(outputs_t *outputs) {
     outputs->stdoutStr = (char *)calloc(kMaxRead, sizeof(char));
     outputs->stderrStr = (char *)calloc(kMaxRead, sizeof(char));
     if (!outputs->stdoutStr || !outputs->stderrStr) {
         fprintf(stderr, "[Error] error in calloc()\n");
-        /* setting to 0 is necessary */
-        outputs->stdoutSize = 0;
-        outputs->stderrSize = 0;
-        return;
+        return 1;
     }
-    outputs->stdoutSize = read(stdoutRead, outputs->stdoutStr, kMaxRead);
-    outputs->stderrSize = read(stderrRead, outputs->stderrStr, kMaxRead);
-    return;
+    return 0;
+}
+
+void freeOutputs(outputs_t *outputs) {
+    if (outputs->stdoutStr) { free(outputs->stdoutStr); }
+    if (outputs->stderrStr) { free(outputs->stderrStr); }
+}
+
+void recordTime(time_report_t *times, int which) {
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &(times->proc[which]));
+    clock_gettime(CLOCK_REALTIME, &(times->real[which]));
+}
+
+void subtractTime(ntime_t * const t1, ntime_t * const t2, ntime_t *dt) {
+    dt->tv_nsec = t2->tv_nsec - t1->tv_nsec;
+    dt->tv_sec  = t2->tv_sec - t1->tv_sec;
+    if (dt->tv_sec > 0 && dt->tv_nsec < 0) {
+        dt->tv_nsec += 1e9;
+        dt->tv_sec -= 1;
+    }
+    else if (dt->tv_sec < 0 && dt->tv_nsec > 0) {
+        dt->tv_nsec -= 1e9;
+        dt->tv_sec += 1;
+    }
+}
+
+void calcElapsed(time_report_t *times) {
+    subtractTime(&(times->proc[kStart]), &(times->proc[kFinish]), &(times->proc[kElapsed]));
+    subtractTime(&(times->real[kStart]), &(times->real[kFinish]), &(times->real[kElapsed]));
 }
 
 static void sigHandler(int sig) {

@@ -36,7 +36,7 @@ Craft has a simple architecture. It is basically a client-server pattern, but th
 - observer: the program (client) that runs commands and capture commands' output,
 - recorder: the program (server) that logs reports sent by observers.
 
-Because each (interested) command in Makefile will be invoked by the observer, it is crucial that the observer adds a minimum runtime overhead. Therefore, the observer is written in C, and should be compiled before invoking Craft. If the manager finds the observer is not compiled, it will automatically compile it before launching the first observer.
+Each (interested) command in Makefile will be invoked by the observer. Therefore, it is crucial that the observer only adds a minimum runtime overhead. Therefore, the observer is written in C, and should be compiled before invoking Craft. Luckily, if the manager finds the observer was not compiled, it will automatically compile it for you before launching the first observer.
 
 ### 5. How to use
 1. Add `$(OBSERVER)` to the compiler name in the Makefile. In other words, instead of having
