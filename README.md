@@ -89,9 +89,9 @@ recorder server established: localhost:8081
 [Compile] => chrome2.o
 [Library] => libchrome.so
 [Compile][Link] => chrome
-[Compile][Link] => content_shell.o
-[Compile][Link] => browser_unittest.o
+[Compile] => content_shell.o
 [Link] => content_shell
+[Compile] => browser_unittest.o
 [Link] => browser_unittest
 ```
 
