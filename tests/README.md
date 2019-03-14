@@ -15,7 +15,7 @@ make
 Try makefile with Craft:
 ```shell
 make clean
-../craft.py -w log.json -- -j2 # run: make -j2
+../craft.py -w log.json
 ```
 
 ###### EOF

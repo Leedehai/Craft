@@ -1,0 +1,12 @@
+execute: make -C tests -j2
+recorder server established: localhost:8081
+[Compile] => chrome1.o
+[Compile] => chrome2.o
+[Library] => libchrome.so
+[Compile][Link] => chrome
+[Compile] => content_shell.o
+[Link] => content_shell
+[Compile] => browser_unittest.o
+[Link] => browser_unittest
+craft: dump log to log.json
+recorder server closes

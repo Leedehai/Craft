@@ -40,6 +40,12 @@ Craft has a simple architecture. It is basically a client-server pattern, but th
 Each (interested) command in Makefile will be invoked by the observer, and a Makefile may contain a fairly large amount of commands. Therefore, it is crucial that the observer only adds a minimal runtime overhead. Therefore, the observer is written in C. Fear not, however - if the manager finds the observer is not compiled or is out-of-date, it will automatically compile it for you.
 
 ### 5. How to use
+
+0. Ensure no other programs are using `localhost:8081`, i.e. this command should return nothing:
+	```she
+	lsof -t -i :8081 # get ID of process listening to port 8081
+	```
+
 1. Add `$(OBSERVER)` to the compiler name in your existing Makefile. In other words, instead of having
 	```makefile
 	CXX = clang++ # or g++
@@ -93,6 +99,13 @@ recorder server established: localhost:8081
 [Link] => content_shell
 [Compile] => browser_unittest.o
 [Link] => browser_unittest
+craft: dump log to log.json
+recorder server closes
+```
+
+A testing script automates the above for you:
+```shell
+./run-test.py
 ```
 
 ###### EOF

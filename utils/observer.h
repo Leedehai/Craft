@@ -61,15 +61,19 @@ void captureOutputs(outputs_t *, int stdoutRead, int stderrRead);
 void sendData(char *data, size_t len);
 void writeString(int fd, const char *str, size_t len);
 
-size_t serializeData(char *data, outputs_t *, time_report_t *, char *cmd[], int exitCode);
+size_t serializeData(
+    char *data, outputs_t *, time_report_t *, char *cmd[], int exitCode);
 
 int createClientSocket(const char *host, unsigned short port);
 void closeClientSocket(int sock);
+
 int callocOutputs(outputs_t *);
 void freeOutputs(outputs_t *);
+
 void recordTime(time_report_t *times, int which);
 double ntimeToSec(ntime_t *t);
 void calcElapsed(time_report_t *times);
+
 const char *getSignalName(int sig);
 void printSignal(FILE *f, int sig);
 

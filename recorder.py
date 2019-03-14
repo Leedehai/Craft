@@ -17,7 +17,7 @@
 #   ./observer g++ file.cc -o file
 #   ./observer date
 #   ./observer sleep 1
-#   ./observer :dump log.json
+#   ./observer :close log.json
 # Then kill recorder.py. A log.json file is dumped and you can inspect
 # it - it contains the commands you ran and their outputs and exit codes.
 
@@ -34,16 +34,17 @@ record = {}
 RECORDER_HOST = "localhost"
 RECORDER_PORT = 8081  # used by observer to send data
 
-COMMAND_CLEAR_LOG = ":clear"
-COMMAND_DUMP_LOG = ":dump "
+COMMAND_CLEAR = ":clear"
+COMMAND_CLOSE = ":close"
 
 MAX_PACKET_LEN = 9580
 BACK_LOG_SIZE = 32
 
-def dump_log(record_dict, dump_log_command):
-    filename = dump_log_command[len(COMMAND_DUMP_LOG):].strip()
+def dump_log_sync(record_dict, dump_log_command):
+    filename = dump_log_command[len(COMMAND_CLOSE):].strip()
+    if not filename:
+        return
     content_string = json.dumps(record_dict, indent=2, sort_keys=True)
-    print(content_string) # for debugging TODO should be removed
     with open(filename, 'w') as f:
         f.write(content_string + '\n')
 
@@ -65,10 +66,11 @@ def parse_data(data): # parse data (sync)
 def handle_data(data):
     global record
     data_dict = parse_data(data)
-    if data_dict["cmd"].startswith(COMMAND_DUMP_LOG):
-        dump_log(record, data_dict["cmd"])
-        return
-    if data_dict["cmd"].strip() == COMMAND_CLEAR_LOG:
+    if data_dict["cmd"].startswith(COMMAND_CLOSE):
+        dump_log_sync(record, data_dict["cmd"])
+        print("recorder server closes")
+        sys.exit(0)
+    if data_dict["cmd"].strip() == COMMAND_CLEAR:
         record = {}
         return
     record[time.time()] = data_dict

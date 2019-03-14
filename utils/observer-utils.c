@@ -84,8 +84,14 @@ static void subtractTime(ntime_t * const t1, ntime_t * const t2, ntime_t *dt) {
 }
 
 void calcElapsed(time_report_t *times) {
-    subtractTime(&(times->proc[kStart]), &(times->proc[kFinish]), &(times->proc[kElapsed]));
-    subtractTime(&(times->real[kStart]), &(times->real[kFinish]), &(times->real[kElapsed]));
+    subtractTime(
+        &(times->proc[kStart]), &(times->proc[kFinish]),
+        &(times->proc[kElapsed])
+    );
+    subtractTime(
+        &(times->real[kStart]), &(times->real[kFinish]),
+        &(times->real[kElapsed])
+    );
 }
 
 const char *getSignalName(int sig) {

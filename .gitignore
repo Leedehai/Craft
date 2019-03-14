@@ -6,6 +6,7 @@ build/**
 *.o
 *.g.gch
 observer
+stdout.txt
 log*
 !example-log.json
 !tests/googletest/libgoogletest.so

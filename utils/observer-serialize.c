@@ -9,12 +9,14 @@
 
 #include "observer.h"
 
-static void appendString(char *dest, const char *src, size_t count, size_t *pos) {
+static void
+appendString(char *dest, const char *src, size_t count, size_t *pos) {
     memcpy(dest + *pos, src, count);
     *pos += count;
 }
 
-static void appendDouble(char *dest, const char *fmt, double value, size_t *pos) {
+static void
+appendDouble(char *dest, const char *fmt, double value, size_t *pos) {
     int count = sprintf(dest + *pos, fmt, value);
     *pos += count;
 }
