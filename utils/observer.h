@@ -6,7 +6,7 @@
  * ---------------------------
  * Observer. It executes a command from stdin, and captures the command's
  * stdout and stderr output, and send data to recorder.
- * NOTE it heavily relies on POSIX libraries.
+ * NOTE it heavily relies on POSIX - incompatible with Windows.
  */
 
 #ifndef OBSERVER_H_

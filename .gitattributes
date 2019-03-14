@@ -1,0 +1,3 @@
+# formatter.py was authored by me, too, but I mark it as vendored
+# as it was taken from another repo of mine: https://github.com/Leedehai/make-output-prettify
+utils/formatter.py linguist-vendored

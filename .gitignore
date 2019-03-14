@@ -6,3 +6,9 @@ build/**
 *.o
 *.g.gch
 observer
+log*
+!example-log.json
+!tests/googletest/libgoogletest.so
+tests/chrome
+tests/content_shell
+tests/browser_unittest

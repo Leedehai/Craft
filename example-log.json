@@ -1,0 +1,146 @@
+{
+  "1552551564.469677": {
+    "cmd": "./g++ chrome1.cc -std=c++14 -DNDEBUG -Wall -pedantic -O2 -fPIC -c -o chrome1.o", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001331", 
+        "0.001566", 
+        "0.000235"
+      ], 
+      "real": [
+        "1552551564.439013", 
+        "1552551564.467678", 
+        "0.028665"
+      ]
+    }
+  }, 
+  "1552551564.505632": {
+    "cmd": "./g++ chrome2.cc -std=c++14 -DNDEBUG -Wall -pedantic -O2 -fPIC -c -o chrome2.o", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001355", 
+        "0.001564", 
+        "0.000209"
+      ], 
+      "real": [
+        "1552551564.472176", 
+        "1552551564.503985", 
+        "0.031809"
+      ]
+    }
+  }, 
+  "1552551564.540663": {
+    "cmd": "./g++ chrome1.o chrome2.o -fPIC -o libchrome.so", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001359", 
+        "0.001550", 
+        "0.000191"
+      ], 
+      "real": [
+        "1552551564.508080", 
+        "1552551564.539110", 
+        "0.031030"
+      ]
+    }
+  }, 
+  "1552551564.584409": {
+    "cmd": "./g++ content_shell.cc -DNDEBUG -Wall -pedantic -O2 -std=c++14 -o content_shell.o", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001213", 
+        "0.001441", 
+        "0.000228"
+      ], 
+      "real": [
+        "1552551564.543926", 
+        "1552551564.582380", 
+        "0.038454"
+      ]
+    }
+  }, 
+  "1552551564.584562": {
+    "cmd": "./g++ chrome.cc -L. -lchrome -o chrome -lpthread", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001447", 
+        "0.001658", 
+        "0.000211"
+      ], 
+      "real": [
+        "1552551564.543260", 
+        "1552551564.582245", 
+        "0.038985"
+      ]
+    }
+  }, 
+  "1552551564.627694": {
+    "cmd": "./g++ browser_unittest.cc -std=c++14 -DNDEBUG -Wall -pedantic -O2 -o browser_unittest.o -fsanitize=undefined,address", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001514", 
+        "0.001736", 
+        "0.000222"
+      ], 
+      "real": [
+        "1552551564.587079", 
+        "1552551564.625909", 
+        "0.038830"
+      ]
+    }
+  }, 
+  "1552551564.627906": {
+    "cmd": "./g++ content_shell.o -L. -lchrome -o content_shell -lpthread", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001377", 
+        "0.001625", 
+        "0.000248"
+      ], 
+      "real": [
+        "1552551564.587790", 
+        "1552551564.625825", 
+        "0.038035"
+      ]
+    }
+  }, 
+  "1552551564.663491": {
+    "cmd": "./g++ browser_unittest.o -L. -lchrome -Lgoogletest -lgoogletest -o browser_unittest -lpthread -fsanitize=undefined,address", 
+    "err": "", 
+    "exit": "0", 
+    "out": "This line should be captured by observer, not printed to console", 
+    "time": {
+      "proc": [
+        "0.001343", 
+        "0.001551", 
+        "0.000208"
+      ], 
+      "real": [
+        "1552551564.630150", 
+        "1552551564.661663", 
+        "0.031513"
+      ]
+    }
+  }
+}

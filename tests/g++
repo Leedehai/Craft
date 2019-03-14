@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# Placeholder compiler.
+
+import sys
+
+args = sys.argv[1:]
+output_name = args[args.index("-o") + 1]
+with open(output_name, 'w') as f:
+    f.write(output_name + '\n')
+
+print("This line should be captured by observer, not printed to console")
