@@ -1,5 +1,5 @@
-execute: make -C tests -j2
-recorder server established: localhost:8081
+craft: recorder server established at localhost:8081
+craft: make -C tests -j2
 [Compile] => chrome1.o
 [Compile] => chrome2.o
 [Library] => libchrome.so
@@ -8,5 +8,3 @@ recorder server established: localhost:8081
 [Link] => content_shell
 [Compile] => browser_unittest.o
 [Link] => browser_unittest
-craft: dump log to log.json
-recorder server closes

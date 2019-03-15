@@ -29,7 +29,8 @@ This is where Craft comes in.
 - Python 2.7, or Python 3.5 or higher.
 
 ### 3. Limitations
-This project is taken from a larger C/C++ project of mine, and I don't intend to generalize it at the moment.
+This project is taken from a larger C/C++ project of mine, and I don't intend to generalize it at the moment.<br>
+Also, Craft is not tested on *large* project in industry; it is a hobby project, after all.
 
 ### 4. Overview
 Craft has a simple architecture. It is basically a client-server pattern, but the communication between clients and the server is monodirectional. In light of this, Craft has three components:
@@ -99,13 +100,12 @@ recorder server established: localhost:8081
 [Link] => content_shell
 [Compile] => browser_unittest.o
 [Link] => browser_unittest
-craft: dump log to log.json
-recorder server closes
 ```
 
 A testing script automates the above for you:
 ```shell
-./run-test.py
+$ ./run-test.py
+OK.
 ```
 
 ###### EOF

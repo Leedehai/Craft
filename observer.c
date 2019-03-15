@@ -27,7 +27,7 @@ int runCommand(char *cmd[]) {
     time_report_t times;
     recordTime(&times, kStart);
 
-	subprocess_t sp = { fork(), stdoutPipe[kRead], stderrPipe[kRead] }; 
+    subprocess_t sp = { fork(), stdoutPipe[kRead], stderrPipe[kRead] };
 	
     if (sp.pid == 0) { /* child process */
         /* prevent child from reading from pipe */

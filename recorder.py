@@ -51,7 +51,7 @@ def dump_log_sync(record_dict, dump_log_command):
 HEADER_PAYLOAD_REGEX = re.compile(r"\[\#(\w+)\#\]([^(\[\#)]*)")
 def parse_data(data): # parse data (sync)
     data_dict = {}
-    for match in HEADER_PAYLOAD_REGEX.finditer(data):
+    for match in HEADER_PAYLOAD_REGEX.finditer(data.decode()):
         header = match.group(1).strip()
         payload = match.group(2).strip()
         if header == "time":
@@ -68,7 +68,6 @@ def handle_data(data):
     data_dict = parse_data(data)
     if data_dict["cmd"].startswith(COMMAND_CLOSE):
         dump_log_sync(record, data_dict["cmd"])
-        print("recorder server closes")
         sys.exit(0)
     if data_dict["cmd"].strip() == COMMAND_CLEAR:
         record = {}
@@ -95,7 +94,7 @@ class EventDrivenServer(asyncore.dispatcher):
         except Exception as e:
             print("[Error] recorder: error to establish server. Port %s:%d already in use?" % (host, port))
             sys.exit(1)
-        print("recorder server established: %s:%d" % (host, port))
+        print("craft: recorder server established at %s:%d" % (host, port))
 
     def handle_accept(self):
         pair = self.accept()

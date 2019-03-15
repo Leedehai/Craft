@@ -41,10 +41,10 @@ def compare_log(actual, expected):
             proc_time_diff = proc_times[1] - proc_times[0]
             real_time_diff = real_times[1] - real_times[0]
             if not (proc_times[1] < 10.0 and proc_times[0] < proc_times[1]
-                    and 0.99 < proc_times[2] / proc_time_diff < 1.01):
+                    and equal_float(proc_times[2], proc_time_diff)):
                 return False, None
             if not (real_times[1] > 15e8 and real_times[0] < real_times[1]
-                    and 0.99 < real_times[2] / real_time_diff < 1.01):
+                    and equal_float(real_times[2], real_time_diff)):
                 return False, None
         return True, max_finish_real_time - min_start_real_time
     has_error = False
@@ -61,6 +61,10 @@ def compare_log(actual, expected):
         return False, None
     return False if has_error else True, make_elapse
 
+def equal_float(a, b):
+    # float comparison is not precise
+    return abs(a - b) <= 0.00001
+
 def compare_out(actual, expected):
     # sort the stdout, because of concurrency of Make ('-j2') interleaves the lines
     actual_strings = sorted([ l.strip() for l in open(actual, 'r') if len(l.strip()) ])
@@ -68,6 +72,8 @@ def compare_out(actual, expected):
     return actual_strings == expected_strings
 
 def main():
+    if os.path.isfile("./observer"):
+        os.remove("./observer")
     with open(os.devnull, 'w') as DEVNULL: # Python2 doesn't have subprocess.DEVNULL
         subprocess.call("make -C tests clean", shell=True, stdout=DEVNULL)
     with open(OUT_FILENAME, 'w') as out_f:
