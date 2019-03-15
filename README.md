@@ -38,37 +38,38 @@ Craft has a simple architecture. It is basically a client-server pattern, but th
 - observer: the program (client) that runs commands and capture commands' output,
 - recorder: the program (server) that logs reports sent by observers.
 
+The recorder is an event-driven server, as opposed to a multiprocessing/multithreading one, because the number of observers trying to send data to it at (almost) the same time is potentially large.
+
 Each (interested) command in Makefile will be invoked by the observer, and a Makefile may contain a fairly large amount of commands. Therefore, it is crucial that each observer only adds a **[minimal runtime overhead]**. Therefore, the observer is written in C. Fear not, however - if the manager finds the observer is not compiled or is out-of-date, it will automatically compile it for you.
 
 ### 5. Testing, performance
 
 #### Testing script
 ```shell
+# to ensure correct behavior
 $ ./run-test.py
 OK.
 ```
 
 #### Performance
 
-[perf/README.md](perf/README.md).
+[perf/README.md](perf/README.md): measure its (a) runtime overhead and (b) server's success rate.
 
-When *N* observed commands execute **sequentially**<sup>*</sup>, the overhead Craft adds is:
+When *N* observed commands execute sequentially, the overhead Craft adds is:
 ```
-overhead = python interpreter starting time
-           + craft starting time
-           + recorder server starting time
-           + recorder log dumping disk I/O
-           + N * (observer overhead + recorder handling overhead)
-         ~ C + N * a
-         ~ O(N)
+overhead ~ C + N * a ~ O(N)
 
 	fixed overhead    C = 0.1504 sec
-	variable overhead a = 0.0045 sec / command
+	variable overhead a = 0.0045 sec each
 ```
 
-![perf/perf-all.png](perf/perf-all.png)
+This plot demonstrates the overhead (note the y-axis is logarithmic).
 
-> \* only for the sake of simplicity.
+![overhead](perf/perf-all.png)
+
+This plot shows the success rate at `k = 1`, i.e. the client aborts after 1 unsuccessful attempt to connect to the server.
+
+![sucess rate k = 1](perf/perf-bombing-1.png)
 
 ### 6. How to use
 

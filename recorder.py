@@ -38,7 +38,7 @@ COMMAND_CLEAR = ":clear"
 COMMAND_CLOSE = ":close"
 
 MAX_PACKET_LEN = 9580
-BACK_LOG_SIZE = 32
+BACKLOG_SIZE = 128
 
 def dump_log_sync(record_dict, dump_log_command):
     filename = dump_log_command[len(COMMAND_CLOSE):].strip()
@@ -90,7 +90,7 @@ class EventDrivenServer(asyncore.dispatcher):
             self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
             self.set_reuse_addr()
             s = self.bind((host, port))
-            self.listen(BACK_LOG_SIZE)
+            self.listen(BACKLOG_SIZE)
         except Exception as e:
             print("[Error] recorder: error to establish server. Port %s:%d already in use?" % (host, port))
             sys.exit(1)

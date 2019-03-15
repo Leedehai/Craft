@@ -25,7 +25,7 @@
 #include <sys/wait.h>
 
 static const int kClientSocketError = -1;
-static const int kDefaultBacklog = 32;
+static const int kDefaultBacklog = 128;
 
 /* C disallows variable-sized array from initialization, hence I have
  * to define kMaxRead as a macro instead of a 'static const int' */

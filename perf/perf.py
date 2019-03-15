@@ -3,15 +3,6 @@
 import os, sys, time
 import subprocess
 
-class cd:
-    def __init__(self, to_path):
-        self.to_path = to_path
-    def __enter__(self):
-        self.original_path = os.getcwd()
-        os.chdir(self.to_path)
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.original_path)
-
 def run(filename):
     print("run: %-10s observed commands: %s" % (filename, int(filename.split('.')[0])))
     start_time = time.time()
@@ -25,7 +16,11 @@ def run(filename):
     except subprocess.CalledProcessError: # no process is using port
         pid = ""
     if len(pid):
-        subprocess.call("kill %s" % pid, shell=True)
+        # not elegant, because the process might terminate after getting the PID
+        # but before invoking 'kill', and the OS might assign another process
+        # to this PID, so we may end up killing the wrong process. But we take
+        # the chance - it is only a perf test.
+        subprocess.call("kill %s &> /dev/null" % pid, shell=True)
     with open(os.devnull, 'w') as DEVNULL: # python2 doesn't define subprocess.DENULL
         start_time = time.time()
         p = subprocess.Popen(("../craft.py -- -f %s" % filename).split(), stdout=DEVNULL)
@@ -36,8 +31,10 @@ def run(filename):
     return without_craft_time, with_craft_time
 
 def main():
-    makefiles = sorted(
-        [ filename for filename in os.listdir(".") if filename.endswith(".make") ],
+    makefiles = sorted([
+            filename for filename in os.listdir(".")
+            if filename.endswith(".make") and filename[0].isdigit()
+        ],
         key=lambda filename : int(filename.split('.')[0])
     )
 

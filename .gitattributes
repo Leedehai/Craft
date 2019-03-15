@@ -4,3 +4,4 @@ utils/formatter.py linguist-vendored
 
 run-test.py linguist-detectable=false
 perf/*.make linguist-detectable=false
+perf/*.py linguist-detectable=false
