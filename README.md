@@ -3,11 +3,11 @@
 More than Make.
 
 **craft**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;*verb*&nbsp;&nbsp;&nbsp;&nbsp;to make or produce with care, skill, or ingenuity.
+&nbsp;&nbsp;&nbsp;&nbsp;*verb*&nbsp;&nbsp;&nbsp;&nbsp;to **make** or produce with care, skill, or ingenuity.
 
 Craft is a build monitor on top of Make, a build utility.
 
-With minimal changes of code, it can be applied to other build systems, like Google's [Ninja](https://ninja-build.org), as well. 
+With minimal changes of code, it can be applied to other build systems, like Google's [Ninja](https://ninja-build.org), as well.
 
 ### 1. Use case
 Often times, a project has a (or more) complicated Makefile (handwritten or generated). Lots of information, the majority of them being the commands executed, is printed to stdout when Make is executing the Makefile.
@@ -38,9 +38,39 @@ Craft has a simple architecture. It is basically a client-server pattern, but th
 - observer: the program (client) that runs commands and capture commands' output,
 - recorder: the program (server) that logs reports sent by observers.
 
-Each (interested) command in Makefile will be invoked by the observer, and a Makefile may contain a fairly large amount of commands. Therefore, it is crucial that the observer only adds a minimal runtime overhead. Therefore, the observer is written in C. Fear not, however - if the manager finds the observer is not compiled or is out-of-date, it will automatically compile it for you.
+Each (interested) command in Makefile will be invoked by the observer, and a Makefile may contain a fairly large amount of commands. Therefore, it is crucial that each observer only adds a **[minimal runtime overhead]**. Therefore, the observer is written in C. Fear not, however - if the manager finds the observer is not compiled or is out-of-date, it will automatically compile it for you.
 
-### 5. How to use
+### 5. Testing, performance
+
+#### Testing script
+```shell
+$ ./run-test.py
+OK.
+```
+
+#### Performance
+
+[perf/README.md](perf/README.md).
+
+When *N* observed commands execute **sequentially**<sup>*</sup>, the overhead Craft adds is:
+```
+overhead = python interpreter starting time
+           + craft starting time
+           + recorder server starting time
+           + recorder log dumping disk I/O
+           + N * (observer overhead + recorder handling overhead)
+         ~ C + N * a
+         ~ O(N)
+
+	fixed overhead    C = 0.1504 sec
+	variable overhead a = 0.0045 sec / command
+```
+
+![perf/perf-all.png](perf/perf-all.png)
+
+> \* only for the sake of simplicity.
+
+### 6. How to use
 
 0. Ensure no other programs are using `localhost:8081`, i.e. this command should return nothing:
 	```she
@@ -76,7 +106,7 @@ For help, `craft.py --help`.
 
 You can play with recorder and observer without the manager - see the comment at the start of [recorder.py](recorder.py).
 
-### 6. Try it yourself
+### 7. Try it yourself
 In this project directory:
 
 ```shell
@@ -100,12 +130,6 @@ recorder server established: localhost:8081
 [Link] => content_shell
 [Compile] => browser_unittest.o
 [Link] => browser_unittest
-```
-
-A testing script automates the above for you:
-```shell
-$ ./run-test.py
-OK.
 ```
 
 ###### EOF

@@ -13,3 +13,4 @@ log*
 tests/chrome
 tests/content_shell
 tests/browser_unittest
+perf/plot.py
