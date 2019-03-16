@@ -5,6 +5,7 @@
  * file: observer-utils.c
  * ---------------------------
  * Observer utilities.
+ * NOTE it heavily relies on POSIX - incompatible with Windows.
  */
 
 #include "observer.h"
@@ -12,31 +13,33 @@
 #include <sys/socket.h> /* for socket, connect, etc. */
 #include <arpa/inet.h>  /* for htonl, htons, sockaddr_in, etc. */
 
-int createClientSocket(const char *host, unsigned short port) {
+int createClientSocket(const char *host, unsigned short port, int attempt) {
   struct hostent *he = gethostbyname(host);
   if (he == NULL) {
-      fprintf(stderr, "[Error] observer: host not resolved: %s\n", host);
-      return kClientSocketError;
+      fprintf(stderr,
+        "[Error] observer connect attempt %d: host not resolved (%s)\n", attempt, host);
+      return kClientCreateSocketError;
   }
 
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
-      fprintf(stderr, "[Error] observer: error when creating client socket\n");
-      return kClientSocketError;
+      fprintf(stderr,
+        "[Error] observer connect attempt %d: unable to create client socket\n", attempt);
+      return kClientCreateSocketError;
   }
   
   struct sockaddr_in serverAddress;
   memset(&serverAddress, 0, sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(port);
-  serverAddress.sin_addr.s_addr = 
-    ((struct in_addr *)he->h_addr_list[0])->s_addr;
+  serverAddress.sin_addr.s_addr = ((struct in_addr *)he->h_addr_list[0])->s_addr;
   
   if (connect(sock, (struct sockaddr *) &serverAddress, 
 	      sizeof(serverAddress)) != 0) {
-    fprintf(stderr, "[Error] observer: unable to connect %s:%d\n", host, port);
+    fprintf(stderr,
+        "[Error] observer connect attempt %d: unable to connect %s:%d\n", attempt, host, port);
     close(sock);
-    return kClientSocketError;
+    return kClientConnectSocketError;
   }
   
   return sock;

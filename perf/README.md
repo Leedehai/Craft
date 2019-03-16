@@ -91,16 +91,25 @@ Craft command used:
 ../craft.py -w bomb.json -- -f bomb.make t0 t1 ... tN -j
 ```
 
-In this directory:
+#### when kClientMaxAttempts = 1
+
+First, in [observer.h](../utils/observer.h) modify the value of `kClientMaxAttempts` to 1.<br>
+Then, in this directory:
 ```shell
 $ ./perf2.py
 # don't want to wait? Keyboard interrupt: dump results to file prematurely
 ```
+Finally, do not forget to change `kClientMaxAttempts` back to 3.
+
 [run 1](./perf2-res-1.txt), [run 2](./perf2-res-2.txt), [run 3](./perf2-res-3.txt).
 
 This plot shows the success rate at `k = 1`, i.e. the client aborts after 1 failed attempt to connect to the server.
 
 ![success rate k = 1](perf-bombing-1.png)
+
+#### when kClientMaxAttempts = 3
+
+The success rate is always 100% from 0 tasks to 20303 tasks<sup>*</sup>.
 
 > \* Taken from GNU Make manual:
 ```
@@ -111,7 +120,7 @@ This plot shows the success rate at `k = 1`, i.e. the client aborts after 1 fail
 ```
 
 ##### Worth noting
-On this machine, the success rate is always 100% from 0 tasks to 20303 tasks<sup>*</sup>:<br>
+On this machine, when `kClientMaxAttempts` is 1, the success rate is also always 100% from 0 tasks to 20303 tasks<sup>*</sup>:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Linux, Python 2.7, GCC -O3, 3.7 GHz Intel Xeon GOLD 6154 (72 logical cores), 192 GB memory.
 
 > \* if we pass more than 20303 task names, the OS throws an error complaining about argument being too long. For example, a typical Linux limits the memory to store arguments passed to the system call `execve()`, to 32 pages (or 128 KB). It is defined by `MAX_ARG_STRLEN` in `/usr/include/linux/binfmts.h`.

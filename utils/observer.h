@@ -24,12 +24,18 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-static const int kClientSocketError = -1;
-static const int kDefaultBacklog = 128;
+enum {
+    kClientCreateSocketError = -1,
+    kClientConnectSocketError = -2,
+    kClientWriteSocketError = -3,
+    kClientSendDataSuccess = 0,
+};
 
-/* C disallows variable-sized array from initialization, hence I have
- * to define kMaxRead as a macro instead of a 'static const int' */
-#define kMaxRead 4096
+enum {
+    kClientMaxAttempts = 3,
+    kDefaultBacklog = 128,
+    kMaxRead = 4096,
+};
 
 enum { kRead = 0, kWrite = 1 };
 
@@ -58,13 +64,13 @@ static const size_t kPacketMaxLen = 4096 * 2 + 256 + 1024 + 8 + 100;
 
 int report(subprocess_t *, time_report_t *, char *cmd[], int exitCode);
 void captureOutputs(outputs_t *, int stdoutRead, int stderrRead);
-void sendData(char *data, size_t len);
-void writeString(int fd, const char *str, size_t len);
+int sendData(char *data, size_t len, int attempt);
+int writeString(int fd, const char *str, size_t len);
 
 size_t serializeData(
     char *data, outputs_t *, time_report_t *, char *cmd[], int exitCode);
 
-int createClientSocket(const char *host, unsigned short port);
+int createClientSocket(const char *host, unsigned short port, int attempt);
 void closeClientSocket(int sock);
 
 int callocOutputs(outputs_t *);

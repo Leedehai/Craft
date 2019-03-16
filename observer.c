@@ -84,7 +84,19 @@ int report(subprocess_t *sp, time_report_t *times, char *cmd[], int exitCode) {
         return 1;
     }
     size_t len = serializeData(data, &outputs, times, cmd, exitCode);
-    sendData(data, len < kPacketMaxLen ? len : kPacketMaxLen);
+    
+    int attempt = 0;
+    while (attempt < kClientMaxAttempts) {
+        size_t sendLen = len < kPacketMaxLen ? len : kPacketMaxLen;
+        int status = sendData(data, sendLen, ++attempt);
+        /* the current design decision is that the observer would not wait for the server
+         * to ACK, and the server would not ACK. Much like a UDP. */
+        if (status == kClientSendDataSuccess) { break; }
+        else { /* errors */
+            /* server might be overwhelmed; we wait for a while before retrying */
+            usleep(5e4); /* 5e4 micro second: 50 millisecond */
+        }
+    }
 
     freeOutputs(&outputs);
     free(data);
@@ -97,22 +109,33 @@ void captureOutputs(outputs_t *outputs, int stdoutRead, int stderrRead) {
     return;
 }
 
-void sendData(char *data, size_t len) {
-    int clientSocket = createClientSocket(kRecorderHost, kRecorderPort);
-    if (clientSocket == kClientSocketError) {
+int sendData(char *data, size_t len, int attempt) {
+    int clientSocketOrErrorStatus = createClientSocket(kRecorderHost, kRecorderPort, attempt);
+    if (clientSocketOrErrorStatus < 0) {
         fprintf(stderr, "[Error] observer: abort\n");
-        return;
+        return clientSocketOrErrorStatus;
     }
-    writeString(clientSocket, data, len);
+    int clientSocket = clientSocketOrErrorStatus;
+    int status = writeString(clientSocket, data, len);
+    if (status == kClientWriteSocketError) {
+        return kClientWriteSocketError;
+    }
     closeClientSocket(clientSocket);
+    return kClientSendDataSuccess;
 }
 
-void writeString(int fd, const char *str, size_t len) {
+/* system call send() does the same work if the flag parameter is zero */
+int writeString(int fd, const char *str, size_t len) {
     size_t nBytesWritten = 0;
     while (nBytesWritten < len) {
         /* normally this loop only has one iteration */
-        nBytesWritten += write(fd, str + nBytesWritten, len - nBytesWritten);
+        ssize_t ret = write(fd, str + nBytesWritten, len - nBytesWritten);
+        if (ret < 0) {
+            return kClientWriteSocketError;
+        }
+        nBytesWritten += ret;
     }
+    return kClientSendDataSuccess;
 }
 
 static void sigHandler(int sig) {

@@ -1,3 +1,7 @@
+## NOTE
+
+This was my attempt to patch the build process around GNU Make. Afterwards I switched to the duo of [GN](https://gn.googlesource.com/gn)-[Ninja](https://ninja-build.org).
+
 # Craft
 
 More than Make.
@@ -38,7 +42,9 @@ Craft has a simple architecture. It is basically a client-server pattern, but th
 - observer: the program (client) that runs commands and capture commands' output,
 - recorder: the program (server) that logs reports sent by observers.
 
-The recorder is an event-driven server, as opposed to a multiprocessing/multithreading one, because the number of observers trying to send data to it at (almost) the same time is potentially large.
+The recorder is an event-driven server, as opposed to a multiprocessing/multithreading one, because the number of observers trying to send data to it at (almost) the same time is potentially large. The server does not reply with ACK to clients.
+
+In a highly concurrent situation, a client's connection request might be refused by the server, due to a limited backlog size on the server's socket. Therefore, the client would try connection 3 times before aborting. That being said, normally one attempt is sufficient, and this claim is backed up by section 2 in [perf](perf/README.md).
 
 Each (interested) command in Makefile will be invoked by the observer, and a Makefile may contain a fairly large amount of commands. Therefore, it is crucial that each observer only adds a **[minimal runtime overhead]**. Therefore, the observer is written in C. Fear not, however - if the manager finds the observer is not compiled or is out-of-date, it will automatically compile it for you.
 
@@ -63,7 +69,7 @@ overhead ~ C + N * a ~ O(N)
 	variable overhead a = 0.0045 sec each
 ```
 
-This plot demonstrates the overhead (note the y-axis is logarithmic).
+This plot demonstrates the overhead (note the left y-axis is logarithmic).
 
 ![overhead](perf/perf-all.png)
 
